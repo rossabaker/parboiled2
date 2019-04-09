@@ -82,7 +82,7 @@ val utestSettings = Seq(
 
 def scalaReflect(v: String) = "org.scala-lang"  %  "scala-reflect"     % v       % "provided"
 val shapeless               = Def.setting("com.chuusai"       %%% "shapeless"         % "2.3.3" % "compile")
-val utest                   = Def.setting("com.lihaoyi"       %%% "utest"             % "0.6.6" % Test)
+val utest                   = Def.setting("com.lihaoyi"       %%% "utest"             % "0.6.7" % Test)
 val scalaCheck              = Def.setting("org.scalacheck"    %%% "scalacheck"        % "1.14.0" % Test)
 // since ScalaCheck native is not available from the original authors @lolgab made a release
 // see https://github.com/rickynils/scalacheck/issues/396#issuecomment-467782592
