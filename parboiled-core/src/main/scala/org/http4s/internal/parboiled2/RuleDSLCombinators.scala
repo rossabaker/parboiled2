@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,8 @@ private[http4s] trait RuleDSLCombinators {
     *   Rule[I, O]     if r == Rule[I, O <: I] // so called "reduction", which leaves the value stack unchanged on a type level
     */
   @compileTimeOnly("Calls to `zeroOrMore` must be inside `rule` macro")
-  def zeroOrMore[I <: HList, O <: HList](r: Rule[I, O])(
-      implicit l: Lifter[immutable.Seq, I, O]
+  def zeroOrMore[I <: HList, O <: HList](r: Rule[I, O])(implicit
+      l: Lifter[immutable.Seq, I, O]
   ): Rule[l.In, l.OptionalOut] with Repeated = `n/a`
 
   /**
@@ -53,8 +53,8 @@ private[http4s] trait RuleDSLCombinators {
     *   Rule[I, O]     if r == Rule[I, O <: I] // so called "reduction", which leaves the value stack unchanged on a type level
     */
   @compileTimeOnly("Calls to `oneOrMore` must be inside `rule` macro")
-  def oneOrMore[I <: HList, O <: HList](r: Rule[I, O])(
-      implicit l: Lifter[immutable.Seq, I, O]
+  def oneOrMore[I <: HList, O <: HList](r: Rule[I, O])(implicit
+      l: Lifter[immutable.Seq, I, O]
   ): Rule[l.In, l.StrictOut] with Repeated = `n/a`
 
   /**
@@ -95,6 +95,7 @@ private[http4s] trait RuleDSLCombinators {
 
   @compileTimeOnly("Calls to `range2NTimes` must be inside `rule` macro")
   implicit def range2NTimes(range: Range): NTimes = `n/a`
+
   sealed trait NTimes {
 
     /**
@@ -108,8 +109,8 @@ private[http4s] trait RuleDSLCombinators {
       *   Rule[I, O]     if r == Rule[I, O <: I] // so called "reduction", which leaves the value stack unchanged on a type level
       */
     @compileTimeOnly("Calls to `times` must be inside `rule` macro")
-    def times[I <: HList, O <: HList](r: Rule[I, O])(
-        implicit s: Lifter[immutable.Seq, I, O]
+    def times[I <: HList, O <: HList](r: Rule[I, O])(implicit
+        s: Lifter[immutable.Seq, I, O]
     ): Rule[s.In, s.StrictOut] with Repeated
   }
 

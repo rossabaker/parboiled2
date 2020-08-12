@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ object DefaultArgumentsSpec extends TestSuite {
   case class A(a: Int = 0, b: Int = 1)
 
   class Foo(val input: ParserInput) extends Parser {
-    def Foo: Rule1[A] = rule { "foo" ~ push(A(b = 2)) }
+    def Foo: Rule1[A] = rule("foo" ~ push(A(b = 2)))
   }
 
   val tests = Tests {

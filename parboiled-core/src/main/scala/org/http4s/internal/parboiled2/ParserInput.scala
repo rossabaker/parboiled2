@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,10 +55,12 @@ private[http4s] object ParserInput {
   val Empty = apply(Array.empty[Byte])
 
   implicit def apply(bytes: Array[Byte]): ByteArrayBasedParserInput = new ByteArrayBasedParserInput(bytes)
+
   implicit def apply(bytes: Array[Byte], endIndex: Int): ByteArrayBasedParserInput =
     new ByteArrayBasedParserInput(bytes, endIndex)
   implicit def apply(string: String): StringBasedParserInput        = new StringBasedParserInput(string)
   implicit def apply(chars: Array[Char]): CharArrayBasedParserInput = new CharArrayBasedParserInput(chars)
+
   implicit def apply(chars: Array[Char], endIndex: Int): CharArrayBasedParserInput =
     new CharArrayBasedParserInput(chars, endIndex)
 
@@ -91,7 +93,7 @@ private[http4s] object ParserInput {
     */
   class ByteArrayBasedParserInput(bytes: Array[Byte], endIndex: Int = 0) extends DefaultParserInput {
     val length                            = if (endIndex <= 0 || endIndex > bytes.length) bytes.length else endIndex
-    def charAt(ix: Int)                   = (bytes(ix) & 0xFF).toChar
+    def charAt(ix: Int)                   = (bytes(ix) & 0xff).toChar
     def sliceString(start: Int, end: Int) = new String(bytes, start, math.max(end - start, 0), `ISO-8859-1`)
 
     def sliceCharArray(start: Int, end: Int) =

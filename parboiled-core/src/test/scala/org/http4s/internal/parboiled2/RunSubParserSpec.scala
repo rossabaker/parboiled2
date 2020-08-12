@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,18 @@ object RunSubParserSpec extends TestParserSpec {
 
   class SubParser(val input: ParserInput) extends Parser {
 
-    def IntNumber = rule {
-      capture(oneOrMore(CharPredicate.Digit)) ~> (_.toInt)
-    }
+    def IntNumber =
+      rule {
+        capture(oneOrMore(CharPredicate.Digit)) ~> (_.toInt)
+      }
   }
 
   abstract class ParserWithSubParser extends TestParser1[Int] {
 
-    def InputLine = rule {
-      oneOrMore(runSubParser(new SubParser(_).IntNumber)).separatedBy(',') ~ EOI ~> (_.sum)
-    }
+    def InputLine =
+      rule {
+        oneOrMore(runSubParser(new SubParser(_).IntNumber)).separatedBy(',') ~ EOI ~> (_.sum)
+      }
   }
 
   val tests = Tests {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,9 @@ object CharPredicateSpec extends TestSuite {
         (CharPredicate("abcäüö") -- "äö").toString ==> "CharPredicate.ArrayBased(abcü)"
       }
       "be backed by a range where possible" - {
-        CharPredicate('1' to 'Ä').toString ==> "CharPredicate.RangeBased(start = 1, end = Ä, step = 1, inclusive = true)"
+        CharPredicate(
+          '1' to 'Ä'
+        ).toString ==> "CharPredicate.RangeBased(start = 1, end = Ä, step = 1, inclusive = true)"
       }
     }
 
@@ -78,7 +80,7 @@ object CharPredicateSpec extends TestSuite {
         case CharPredicate.MaskBased(a, b) => a -> b
         case _                             => throw new IllegalStateException()
       }
-      "%016x|%016x" format (lowMask, highMask)
+      "%016x|%016x".format(lowMask, highMask)
     }
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,40 +25,44 @@ package org.http4s.internal.parboiled2.support
   *
   *  You can `import Unpack.dontUnpack` if you'd like to circumvent this unpacking logic.
   */
-private[http4s] sealed trait Unpack[L <: HList] {
+sealed private[http4s] trait Unpack[L <: HList] {
   type Out
   def apply(hlist: L): Out
 }
 
 private[http4s] object Unpack extends AlternativeUnpacks {
 
-  implicit def fromAux[L <: HList, Out0](implicit aux: Aux[L, Out0]) = new Unpack[L] {
-    type Out = Out0
-    def apply(hlist: L) = aux(hlist)
-  }
+  implicit def fromAux[L <: HList, Out0](implicit aux: Aux[L, Out0]) =
+    new Unpack[L] {
+      type Out = Out0
+      def apply(hlist: L) = aux(hlist)
+    }
 
   sealed trait Aux[L <: HList, Out0] {
     def apply(hlist: L): Out0
   }
 
   implicit def hnil[L <: HNil]: Aux[L, Unit] = HNilUnpack.asInstanceOf[Aux[L, Unit]]
+
   implicit object HNilUnpack extends Aux[HNil, Unit] {
     def apply(hlist: HNil): Unit = ()
   }
 
   implicit def single[T]: Aux[T :: HNil, T] = SingleUnpack.asInstanceOf[Aux[T :: HNil, T]]
+
   private object SingleUnpack extends Aux[Any :: HList, Any] {
     def apply(hlist: Any :: HList): Any = hlist.head
   }
 }
 
-private[http4s] sealed abstract class AlternativeUnpacks {
+sealed abstract private[http4s] class AlternativeUnpacks {
 
   /**
     * Import if you'd like to *always* deliver the valueStack as an `HList`
     * at the end of the parsing run, even if it has only zero or one element(s).
     */
   implicit def dontUnpack[L <: HList]: Unpack.Aux[L, L] = DontUnpack.asInstanceOf[Unpack.Aux[L, L]]
+
   private object DontUnpack extends Unpack.Aux[HList, HList] {
     def apply(hlist: HList): HList = hlist
   }

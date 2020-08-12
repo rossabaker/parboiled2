@@ -1,8 +1,15 @@
+<<<<<<< HEAD:README.md
 This is an internal fork of [parboiled2] for http4s in order to let
 users bring their own [shapeless].
 
 [parboiled2]: https://github.com/sirthias/parboiled2
 [shapeless]: https://github.com/milessabin/shapeless
+=======
+**parboiled2**  |--| A Macro-Based PEG Parser Generator for Scala 2.12+
+
+.. image:: https://travis-ci.org/sirthias/parboiled2.svg?branch=release-2.1
+    :target:
+>>>>>>> sirthias/master:README.rst
 
 # parboiled2
 
@@ -48,13 +55,12 @@ You might also be interested in reading about `parboiled2 vs. Scala Parser Combi
 
 The artifacts for *parboiled2* live on `Maven Central` and can be tied into your SBT-based Scala project like this:
 
-```bash
-    libraryDependencies += "org.parboiled" %% "parboiled" % "2.1.8"
- ```
+    libraryDependencies += "org.parboiled" %% "parboiled" % "2.2.0"
 
-The latest released version is **2.1.8**. It is available for Scala 2.12, 2.13 as well as scala.js 0.6 and scala native.
+The latest released version is **2.2.0**. It is available for Scala 2.12, 2.13 as well as scala.js 1.0.
 
-*parboiled2* has only one single dependency that it will transitively pull into your classpath: shapeless (currently version 2.3.3).
+*parboiled2* has only one single dependency that it will transitively pull into your classpath: shapeless_
+(currently version 2.3.3).
 
 Once on your classpath you can use this single import to bring everything you need into scope:
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import scala.collection.immutable
 import scala.language.experimental.macros
 import org.http4s.internal.parboiled2.support._
 
-private[http4s] sealed trait RuleX
+sealed private[http4s] trait RuleX
 
 /**
   * The general model of a parser rule.
@@ -33,7 +33,7 @@ private[http4s] sealed trait RuleX
   * At runtime there are only two instances of this class which signal whether the rule has matched (or mismatched)
   * at the current point in the input.
   */
-private[http4s] sealed class Rule[-I <: HList, +O <: HList] extends RuleX {
+sealed private[http4s] class Rule[-I <: HList, +O <: HList] extends RuleX {
   // Note: we could model `Rule` as a value class, however, tests have shown that this doesn't result in any measurable
   // performance benefit and, in addition, comes with other drawbacks (like generated bridge methods)
 
@@ -46,8 +46,8 @@ private[http4s] sealed class Rule[-I <: HList, +O <: HList] extends RuleX {
     *   Rule[A, B:C] ~ Rule[D:B:C, E:F] = Rule[D:A, E:F]
     */
   @compileTimeOnly("Calls to `~` must be inside `rule` macro")
-  def ~[I2 <: HList, O2 <: HList](that: Rule[I2, O2])(
-      implicit i: TailSwitch[I2, O @uncheckedVariance, I @uncheckedVariance],
+  def ~[I2 <: HList, O2 <: HList](that: Rule[I2, O2])(implicit
+      i: TailSwitch[I2, O @uncheckedVariance, I @uncheckedVariance],
       o: TailSwitch[O @uncheckedVariance, I2, O2]
   ): Rule[i.Out, o.Out] = `n/a`
 
@@ -56,8 +56,8 @@ private[http4s] sealed class Rule[-I <: HList, +O <: HList] extends RuleX {
     * If the rule being concatenated doesn't match a parse error will be triggered immediately.
     */
   @compileTimeOnly("Calls to `~!~` must be inside `rule` macro")
-  def ~!~[I2 <: HList, O2 <: HList](that: Rule[I2, O2])(
-      implicit i: TailSwitch[I2, O @uncheckedVariance, I @uncheckedVariance],
+  def ~!~[I2 <: HList, O2 <: HList](that: Rule[I2, O2])(implicit
+      i: TailSwitch[I2, O @uncheckedVariance, I @uncheckedVariance],
       o: TailSwitch[O @uncheckedVariance, I2, O2]
   ): Rule[i.Out, o.Out] = `n/a`
 
@@ -75,7 +75,7 @@ private[http4s] sealed class Rule[-I <: HList, +O <: HList] extends RuleX {
     * effects that the underlying rule might have had on the value stack.
     */
   @compileTimeOnly("Calls to `unary_!` must be inside `rule` macro")
-  def unary_!(): Rule0 = `n/a`
+  def unary_! : Rule0 = `n/a`
 
   /**
     * Attaches the given explicit name to this rule.
@@ -93,32 +93,32 @@ private[http4s] sealed class Rule[-I <: HList, +O <: HList] extends RuleX {
     * Postfix shortcut for `zeroOrMore`.
     */
   @compileTimeOnly("Calls to `.*` must be inside `rule` macro")
-  def *(
-      implicit l: Lifter[immutable.Seq, I @uncheckedVariance, O @uncheckedVariance]
+  def *(implicit
+      l: Lifter[immutable.Seq, I @uncheckedVariance, O @uncheckedVariance]
   ): Rule[l.In, l.OptionalOut] with Repeated = `n/a`
 
   /**
     * Postfix shortcut for `zeroOrMore(...).separatedBy(...)`.
     */
   @compileTimeOnly("Calls to `.*` must be inside `rule` macro")
-  def *(separator: Rule0)(
-      implicit l: Lifter[immutable.Seq, I @uncheckedVariance, O @uncheckedVariance]
+  def *(separator: Rule0)(implicit
+      l: Lifter[immutable.Seq, I @uncheckedVariance, O @uncheckedVariance]
   ): Rule[l.In, l.OptionalOut] = `n/a`
 
   /**
     * Postfix shortcut for `oneOrMore`.
     */
   @compileTimeOnly("Calls to `.+` must be inside `rule` macro")
-  def +(
-      implicit l: Lifter[immutable.Seq, I @uncheckedVariance, O @uncheckedVariance]
+  def +(implicit
+      l: Lifter[immutable.Seq, I @uncheckedVariance, O @uncheckedVariance]
   ): Rule[l.In, l.StrictOut] with Repeated = `n/a`
 
   /**
     * Postfix shortcut for `oneOrMore(...).separatedBy(...)`.
     */
   @compileTimeOnly("Calls to `.+` must be inside `rule` macro")
-  def +(separator: Rule0)(
-      implicit l: Lifter[immutable.Seq, I @uncheckedVariance, O @uncheckedVariance]
+  def +(separator: Rule0)(implicit
+      l: Lifter[immutable.Seq, I @uncheckedVariance, O @uncheckedVariance]
   ): Rule[l.In, l.StrictOut] = `n/a`
 }
 
@@ -135,7 +135,7 @@ private[http4s] object Rule extends Rule0 {
   }
 }
 
-private[http4s] abstract class RuleDSL extends RuleDSLBasics with RuleDSLCombinators with RuleDSLActions
+abstract private[http4s] class RuleDSL extends RuleDSLBasics with RuleDSLCombinators with RuleDSLActions
 
 // phantom type for WithSeparatedBy pimp
 private[http4s] trait Repeated

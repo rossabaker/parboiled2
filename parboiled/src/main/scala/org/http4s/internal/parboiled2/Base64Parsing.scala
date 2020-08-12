@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.http4s.internal.parboiled2
 import org.http4s.internal.parboiled2.util.Base64
 
 /**
-
   * Rules for parsing Base-64 encoded strings.
   */
 private[http4s] trait Base64Parsing { this: Parser =>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ private[http4s] trait HListable[T] {
 }
 
 private[http4s] object HListable extends LowerPriorityHListable {
-  implicit def fromUnit: HListable[Unit] { type Out           = HNil } = `n/a`
-  implicit def fromHList[T <: HList]: HListable[T] { type Out = T }    = `n/a`
+  implicit def fromUnit: HListable[Unit] { type Out = HNil } = `n/a`
+  implicit def fromHList[T <: HList]: HListable[T] { type Out = T } = `n/a`
 }
 
-private[http4s] abstract class LowerPriorityHListable {
+abstract private[http4s] class LowerPriorityHListable {
   implicit def fromAnyRef[T]: HListable[T] { type Out = T :: HNil } = `n/a`
 }

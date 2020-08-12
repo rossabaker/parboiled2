@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.http4s.internal.parboiled2
 
- // The whole point is to stay independent of a particular shapeless version
+// The whole point is to stay independent of a particular shapeless version
 import org.specs2.execute.Typecheck.{apply => illTyped}
 
 import support._
@@ -34,7 +34,7 @@ class VarianceSpec {
         abstract class Par extends Parser {
           def A: Rule2[String, Int]   = ???
           def B: PopRule[Any :: HNil] = ???
-          def C: Rule1[String]        = rule { A ~ B }
+          def C: Rule1[String]        = rule(A ~ B)
         }
         ()
       }
@@ -75,7 +75,7 @@ class VarianceSpec {
         abstract class Par extends Parser {
           def A: Rule0      = ???
           def B: Rule1[Int] = ???
-          def C: Rule1[Any] = rule { A ~ B }
+          def C: Rule1[Any] = rule(A ~ B)
         }
       }
 

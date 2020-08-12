@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,21 +31,16 @@ object CharUtilsSpec extends TestSuite with UTestScalaCheck {
       "hexValue" - forAll(hexChars) {
         case (i, c) => CharUtils.hexValue(c) == i
       }.checkUTest()
-      "numberOfHexDigits" - forAll { l: Long =>
-        CharUtils.numberOfHexDigits(l) == java.lang.Long.toHexString(l).length
-      }.checkUTest()
-      "upperHexString" - forAll { l: Long =>
-        CharUtils.upperHexString(l) == java.lang.Long.toHexString(l).toUpperCase
-      }.checkUTest()
-      "lowerHexString" - forAll { l: Long =>
-        CharUtils.lowerHexString(l) == java.lang.Long.toHexString(l)
-      }.checkUTest()
+      "numberOfHexDigits" - forAll { l: Long => CharUtils.numberOfHexDigits(l) == java.lang.Long.toHexString(l).length }
+        .checkUTest()
+      "upperHexString" - forAll { l: Long => CharUtils.upperHexString(l) == java.lang.Long.toHexString(l).toUpperCase }
+        .checkUTest()
+      "lowerHexString" - forAll { l: Long => CharUtils.lowerHexString(l) == java.lang.Long.toHexString(l) }.checkUTest()
       "numberOfDecimalDigits" - forAll { l: Long =>
         CharUtils.numberOfDecimalDigits(l) == java.lang.Long.toString(l).length
       }.checkUTest()
-      "signedDecimalString" - forAll { l: Long =>
-        CharUtils.signedDecimalString(l) == java.lang.Long.toString(l)
-      }.checkUTest()
+      "signedDecimalString" - forAll { l: Long => CharUtils.signedDecimalString(l) == java.lang.Long.toString(l) }
+        .checkUTest()
     }
   }
 }

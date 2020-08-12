@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,11 +64,13 @@ private[http4s] trait OpTreeContext[OpTreeCtx <: ParserMacros.ParserContext] {
   }
 
   sealed abstract class PotentiallyNamedTerminalOpTree(arg: Tree) extends TerminalOpTree {
-    override def bubbleUp = callName(arg) match {
-      case Some(name) =>
-        q"__bubbleUp(org.http4s.internal.parboiled2.RuleTrace.NonTerminal(org.http4s.internal.parboiled2.RuleTrace.Named($name), 0) :: Nil, $ruleTraceTerminal)"
-      case None       => super.bubbleUp
-    }
+
+    override def bubbleUp =
+      callName(arg) match {
+        case Some(name) =>
+          q"__bubbleUp(org.http4s.internal.parboiled2.RuleTrace.NonTerminal(org.http4s.internal.parboiled2.RuleTrace.Named($name), 0) :: Nil, $ruleTraceTerminal)"
+        case None => super.bubbleUp
+      }
     def ruleTraceTerminal: Tree
   }
 
@@ -103,7 +105,7 @@ private[http4s] trait OpTreeContext[OpTreeCtx <: ParserMacros.ParserContext] {
     case q"$base.+($sep)($l)"                              => OneOrMore(OpTree(base), collector(l), Separator(OpTree(sep)))
     case q"$base.times[$a, $b]($r)($s)"                    => Times(base, OpTree(r), collector(s))
     case q"$a.this.&($arg)"                                => AndPredicate(OpTree(arg))
-    case q"$a.unary_!()"                                   => NotPredicate(OpTree(a))
+    case q"$a.unary_!"                                     => NotPredicate(OpTree(a))
     case q"$a.this.atomic[$b, $c]($arg)"                   => Atomic(OpTree(arg))
     case q"$a.this.quiet[$b, $c]($arg)"                    => Quiet(OpTree(arg))
     case q"$a.this.test($flag)"                            => SemanticPredicate(flag)
@@ -149,7 +151,9 @@ private[http4s] trait OpTreeContext[OpTreeCtx <: ParserMacros.ParserContext] {
     def renderInner(wrapped: Boolean): Tree =
       ops
         .map(_.render(wrapped))
-        .reduceLeft((l, r) => q"val l = $l; if (l) $r else false") // work-around for https://issues.scala-lang.org/browse/SI-8657"
+        .reduceLeft((l, r) =>
+          q"val l = $l; if (l) $r else false"
+        ) // work-around for https://issues.scala-lang.org/browse/SI-8657"
   }
 
   case class Cut(lhs: OpTree, rhs: OpTree) extends DefaultNonTerminalOpTree {
@@ -177,9 +181,8 @@ private[http4s] trait OpTreeContext[OpTreeCtx <: ParserMacros.ParserContext] {
     def renderInner(wrapped: Boolean): Tree =
       q"""val mark = __saveState; ${ops
         .map(_.render(wrapped))
-        .reduceLeft(
-          (l, r) =>
-            q"val l = $l; if (!l) { __restoreState(mark); $r } else true // work-around for https://issues.scala-lang.org/browse/SI-8657"
+        .reduceLeft((l, r) =>
+          q"val l = $l; if (!l) { __restoreState(mark); $r } else true // work-around for https://issues.scala-lang.org/browse/SI-8657"
         )}"""
   }
 
@@ -293,6 +296,7 @@ private[http4s] trait OpTreeContext[OpTreeCtx <: ParserMacros.ParserContext] {
 
   case class CharPredicateMatch(predicateTree: Tree) extends PotentiallyNamedTerminalOpTree(predicateTree) {
     def ruleTraceTerminal = q"org.http4s.internal.parboiled2.RuleTrace.CharPredicateMatch($predicateTree)"
+
     def renderInner(wrapped: Boolean): Tree = {
       val unwrappedTree = q"$predicateTree(cursorChar) && __advance()"
       if (wrapped) q"$unwrappedTree && __updateMaxCursor() || __registerMismatch()" else unwrappedTree
@@ -488,12 +492,15 @@ private[http4s] trait OpTreeContext[OpTreeCtx <: ParserMacros.ParserContext] {
         !matched"""
       if (wrapped) {
         val base = op match {
-          case x: TerminalOpTree   => q"org.http4s.internal.parboiled2.RuleTrace.NotPredicate.Terminal(${x.ruleTraceTerminal})"
-          case x: RuleCall         => q"org.http4s.internal.parboiled2.RuleTrace.NotPredicate.RuleCall(${x.calleeNameTree})"
-          case x: StringMatch      => q"""org.http4s.internal.parboiled2.RuleTrace.NotPredicate.Named("\"" + ${x.stringTree} + '"')"""
-          case x: IgnoreCaseString => q"""org.http4s.internal.parboiled2.RuleTrace.NotPredicate.Named("\"" + ${x.stringTree} + '"')"""
-          case x: Named            => q"org.http4s.internal.parboiled2.RuleTrace.NotPredicate.Named(${x.stringTree})"
-          case _                   => q"org.http4s.internal.parboiled2.RuleTrace.NotPredicate.Anonymous"
+          case x: TerminalOpTree =>
+            q"org.http4s.internal.parboiled2.RuleTrace.NotPredicate.Terminal(${x.ruleTraceTerminal})"
+          case x: RuleCall => q"org.http4s.internal.parboiled2.RuleTrace.NotPredicate.RuleCall(${x.calleeNameTree})"
+          case x: StringMatch =>
+            q"""org.http4s.internal.parboiled2.RuleTrace.NotPredicate.Named("\"" + ${x.stringTree} + '"')"""
+          case x: IgnoreCaseString =>
+            q"""org.http4s.internal.parboiled2.RuleTrace.NotPredicate.Named("\"" + ${x.stringTree} + '"')"""
+          case x: Named => q"org.http4s.internal.parboiled2.RuleTrace.NotPredicate.Named(${x.stringTree})"
+          case _        => q"org.http4s.internal.parboiled2.RuleTrace.NotPredicate.Anonymous"
         }
         q"""
         var matchEnd = 0
@@ -561,9 +568,9 @@ private[http4s] trait OpTreeContext[OpTreeCtx <: ParserMacros.ParserContext] {
             case q"(..$args => $body)" =>
               def rewrite(tree: Tree): Tree =
                 tree match {
-                  case Block(statements, res)                                     => block(statements, rewrite(res))
+                  case Block(statements, res)                                                     => block(statements, rewrite(res))
                   case x if isSubClass(resultTypeTree.tpe, "org.http4s.internal.parboiled2.Rule") => expand(x, wrapped)
-                  case x                                                          => q"__push($x)"
+                  case x                                                                          => q"__push($x)"
                 }
               val valDefs = args
                 .zip(argTypeTrees)
@@ -600,12 +607,15 @@ private[http4s] trait OpTreeContext[OpTreeCtx <: ParserMacros.ParserContext] {
   case class PushAction(argTree: Tree, hlTree: Tree) extends OpTree {
 
     def render(wrapped: Boolean): Tree =
-      block(hlTree match {
-        case q"support.this.HListable.fromUnit"       => argTree
-        case q"support.this.HListable.fromHList[$t]"  => q"valueStack.pushAll(${c.untypecheck(argTree)})"
-        case q"support.this.HListable.fromAnyRef[$t]" => q"valueStack.push(${c.untypecheck(argTree)})"
-        case x                                        => c.abort(hlTree.pos, "Unexpected HListable: " + show(x))
-      }, q"true")
+      block(
+        hlTree match {
+          case q"support.this.HListable.fromUnit"       => argTree
+          case q"support.this.HListable.fromHList[$t]"  => q"valueStack.pushAll(${c.untypecheck(argTree)})"
+          case q"support.this.HListable.fromAnyRef[$t]" => q"valueStack.push(${c.untypecheck(argTree)})"
+          case x                                        => c.abort(hlTree.pos, "Unexpected HListable: " + show(x))
+        },
+        q"true"
+      )
   }
 
   case class DropAction(hlTree: Tree) extends OpTree {
@@ -630,6 +640,7 @@ private[http4s] trait OpTreeContext[OpTreeCtx <: ParserMacros.ParserContext] {
     def bubbleUp = q"""
       import org.http4s.internal.parboiled2.RuleTrace._
       e.prepend(RuleCall, start).bubbleUp(Named($calleeNameTree), start)"""
+
     override def render(wrapped: Boolean) =
       call match {
         case Left(_)  => super.render(wrapped)
@@ -685,18 +696,16 @@ private[http4s] trait OpTreeContext[OpTreeCtx <: ParserMacros.ParserContext] {
           case Block(statements, res) => block(statements, actionBody(res))
 
           case x @ (Ident(_) | Select(_, _)) =>
-            val valNames = argTypes.indices.map { i =>
-              TermName("value" + i)
-            }.toList
-            val args = valNames map Ident.apply
+            val valNames = argTypes.indices.map(i => TermName("value" + i)).toList
+            val args     = valNames map Ident.apply
             block(popToVals(valNames), q"__push($x(..$args))")
 
           case q"(..$args => $body)" =>
             def rewrite(tree: Tree): Tree =
               tree match {
-                case Block(statements, res)                                  => block(statements, rewrite(res))
+                case Block(statements, res)                                                  => block(statements, rewrite(res))
                 case x if isSubClass(actionType.last, "org.http4s.internal.parboiled2.Rule") => expand(x, wrapped)
-                case x                                                       => q"__push($x)"
+                case x                                                                       => q"__push($x)"
               }
             block(popToVals(args.map(_.name)), rewrite(body))
         }
@@ -765,7 +774,7 @@ private[http4s] trait OpTreeContext[OpTreeCtx <: ParserMacros.ParserContext] {
   def Separator(op: OpTree): Separator = wrapped => op.render(wrapped)
 
   lazy val HListConsTypeSymbol = c.mirror.staticClass("org.http4s.internal.parboiled2.support.$colon$colon")
-  lazy val HNilTypeSymbol = c.mirror.staticClass("org.http4s.internal.parboiled2.support.HNil")
+  lazy val HNilTypeSymbol      = c.mirror.staticClass("org.http4s.internal.parboiled2.support.HNil")
 
   // tries to match and expand the leaves of the given Tree
   def expand(tree: Tree, wrapped: Boolean): Tree =

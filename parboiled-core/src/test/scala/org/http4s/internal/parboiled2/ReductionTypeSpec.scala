@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,12 @@ object ReductionTypeSpec extends TestSuite {
   case class Foo2(lhs: Foo, rhs: Foo) extends Foo
 
   class FooParser(val input: ParserInput) extends Parser {
-    def OneOrMoreExpr  = rule { foo1 ~ oneOrMore(foo1 ~> Foo2) }
-    def ZeroOrMoreExpr = rule { foo1 ~ zeroOrMore(foo1 ~> Foo2) }
-    def OptionalExpr   = rule { foo1 ~ optional(foo1 ~> Foo2) }
-    def TimesExpr      = rule { foo1 ~ 2.times(foo1 ~> Foo2) }
+    def OneOrMoreExpr  = rule(foo1 ~ oneOrMore(foo1 ~> Foo2))
+    def ZeroOrMoreExpr = rule(foo1 ~ zeroOrMore(foo1 ~> Foo2))
+    def OptionalExpr   = rule(foo1 ~ optional(foo1 ~> Foo2))
+    def TimesExpr      = rule(foo1 ~ 2.times(foo1 ~> Foo2))
 
-    def foo1 = rule { push(Foo1) }
+    def foo1 = rule(push(Foo1))
   }
 
   val tests = Tests {

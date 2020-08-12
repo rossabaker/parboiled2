@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,14 +52,15 @@ object Base64ParsingSpec extends TestSuite {
     "base64CustomBlock"
   )
 
-  def testParser(encoded: String) = new TestParser(encoded) with DynamicRuleHandler[TestParser, Array[Byte] :: HNil] {
-    type Result = String
-    def parser: TestParser                           = this
-    def ruleNotFound(ruleName: String): Result       = "n/a"
-    def success(result: Array[Byte] :: HNil): Result = new String(result.head, UTF8)
-    def parseError(error: ParseError): Result        = throw error
-    def failure(error: Throwable): Result            = throw error
-  }
+  def testParser(encoded: String) =
+    new TestParser(encoded) with DynamicRuleHandler[TestParser, Array[Byte] :: HNil] {
+      type Result = String
+      def parser: TestParser                           = this
+      def ruleNotFound(ruleName: String): Result       = "n/a"
+      def success(result: Array[Byte] :: HNil): Result = new String(result.head, UTF8)
+      def parseError(error: ParseError): Result        = throw error
+      def failure(error: Throwable): Result            = throw error
+    }
 
   def test(ruleName: String, base64: Base64): Unit =
     (1 to 100).foreach { x =>
@@ -74,6 +75,6 @@ object Base64ParsingSpec extends TestSuite {
       val string  = randomChars.take(x).mkString("")
       val encoded = base64.encodeToString(string getBytes UTF8, lineSep = false) + "!"
       val parser  = testParser(encoded)
-      intercept[ParseError] { dispatch(parser, ruleName) }
+      intercept[ParseError](dispatch(parser, ruleName))
     }
 }

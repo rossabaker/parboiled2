@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ abstract class TestParserSpec extends TestSuite {
     sealed trait MustAssert {
       def assert(str: String): Unit
     }
+
     private case class BeMatchedWith(underlying: String => Unit) extends MustAssert {
       override def assert(str: String): Unit = underlying(str)
     }

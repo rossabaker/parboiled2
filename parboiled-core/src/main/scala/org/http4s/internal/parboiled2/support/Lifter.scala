@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,14 @@ import scala.annotation.implicitNotFound
 @implicitNotFound(
   "The `optional`, `zeroOrMore`, `oneOrMore` and `times` modifiers " + "can only be used on rules of type `Rule0`, `Rule1[T]` and `Rule[I, O <: I]`!"
 )
-private[http4s] sealed trait Lifter[M[_], I <: HList, O <: HList] {
+sealed private[http4s] trait Lifter[M[_], I <: HList, O <: HList] {
   type In <: HList
   type StrictOut <: HList
   type OptionalOut <: HList
 }
 
 private[http4s] object Lifter extends LowerPriorityLifter {
+
   implicit def forRule0[M[_]]: Lifter[M, HNil, HNil] {
     type In          = HNil
     type StrictOut   = HNil
@@ -41,7 +42,8 @@ private[http4s] object Lifter extends LowerPriorityLifter {
   } = `n/a`
 }
 
-private[http4s] sealed abstract class LowerPriorityLifter {
+sealed abstract private[http4s] class LowerPriorityLifter {
+
   implicit def forReduction[M[_], L <: HList, R <: L]: Lifter[M, L, R] {
     type In          = L
     type StrictOut   = R

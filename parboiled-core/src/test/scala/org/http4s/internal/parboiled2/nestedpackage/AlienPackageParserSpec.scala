@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,15 @@ import utest._
 
 object AlienPackageParserSpec extends TestSuite {
 
-  abstract class AbstractParser(val input: org.http4s.internal.parboiled2.ParserInput) extends org.http4s.internal.parboiled2.Parser {
+  abstract class AbstractParser(val input: org.http4s.internal.parboiled2.ParserInput)
+      extends org.http4s.internal.parboiled2.Parser {
     import org.http4s.internal.parboiled2.{CharPredicate, Rule1}
 
-    def foo: Rule1[String] = rule { capture("foo" ~ zeroOrMore(CharPredicate.Digit)) }
+    def foo: Rule1[String] = rule(capture("foo" ~ zeroOrMore(CharPredicate.Digit)))
   }
 
   class FooParser(input: String) extends AbstractParser(input) {
-    def Go = rule { foo ~ EOI }
+    def Go = rule(foo ~ EOI)
   }
 
   val tests = Tests {

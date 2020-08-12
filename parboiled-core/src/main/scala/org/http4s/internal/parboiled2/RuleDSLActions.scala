@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,9 +80,10 @@ private[http4s] trait RuleDSLActions {
   def drop[T](implicit h: HListable[T]): PopRule[h.Out] = `n/a`
 
   @compileTimeOnly("Calls to `rule2ActionOperator` must be inside `rule` macro")
-  implicit def rule2ActionOperator[I <: HList, O <: HList](r: Rule[I, O])(
-      implicit ops: ActionOps[I, O]
+  implicit def rule2ActionOperator[I <: HList, O <: HList](r: Rule[I, O])(implicit
+      ops: ActionOps[I, O]
   ): ActionOperator[I, O, ops.Out] = `n/a`
+
   sealed trait ActionOperator[I <: HList, O <: HList, Ops] {
     def ~> : Ops
   }

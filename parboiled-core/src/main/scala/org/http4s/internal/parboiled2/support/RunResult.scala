@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.http4s.internal.parboiled2.support
 import org.http4s.internal.parboiled2._
 
 // phantom type, only used for rule DSL typing
-private[http4s] sealed trait RunResult[T] {
+sealed private[http4s] trait RunResult[T] {
   type Out <: RuleX
 }
 
@@ -32,21 +32,27 @@ private[http4s] object RunResult {
     implicit def forRule[R <: RuleX]: Aux[R, R] = `n/a`
     //implicit def forFHList[I <: HList, R, In0 <: HList, Out0 <: HList](implicit x: JA[I, R, In0, Out0]): Aux[I => R, Rule[In0, Out0]] = `n/a`
   }
+
   abstract class Aux1 extends Aux2 {
-    implicit def forF1[Z, R, In0 <: HList, Out0 <: HList](
-        implicit x: JA[Z :: HNil, R, In0, Out0]
+
+    implicit def forF1[Z, R, In0 <: HList, Out0 <: HList](implicit
+        x: JA[Z :: HNil, R, In0, Out0]
     ): Aux[Z => R, Rule[In0, Out0]] = `n/a`
-    implicit def forF2[Y, Z, R, In0 <: HList, Out0 <: HList](
-        implicit x: JA[Y :: Z :: HNil, R, In0, Out0]
+
+    implicit def forF2[Y, Z, R, In0 <: HList, Out0 <: HList](implicit
+        x: JA[Y :: Z :: HNil, R, In0, Out0]
     ): Aux[(Y, Z) => R, Rule[In0, Out0]] = `n/a`
-    implicit def forF3[X, Y, Z, R, In0 <: HList, Out0 <: HList](
-        implicit x: JA[X :: Y :: Z :: HNil, R, In0, Out0]
+
+    implicit def forF3[X, Y, Z, R, In0 <: HList, Out0 <: HList](implicit
+        x: JA[X :: Y :: Z :: HNil, R, In0, Out0]
     ): Aux[(X, Y, Z) => R, Rule[In0, Out0]] = `n/a`
-    implicit def forF4[W, X, Y, Z, R, In0 <: HList, Out0 <: HList](
-        implicit x: JA[W :: X :: Y :: Z :: HNil, R, In0, Out0]
+
+    implicit def forF4[W, X, Y, Z, R, In0 <: HList, Out0 <: HList](implicit
+        x: JA[W :: X :: Y :: Z :: HNil, R, In0, Out0]
     ): Aux[(W, X, Y, Z) => R, Rule[In0, Out0]] = `n/a`
-    implicit def forF5[V, W, X, Y, Z, R, In0 <: HList, Out0 <: HList](
-        implicit x: JA[V :: W :: X :: Y :: Z :: HNil, R, In0, Out0]
+
+    implicit def forF5[V, W, X, Y, Z, R, In0 <: HList, Out0 <: HList](implicit
+        x: JA[V :: W :: X :: Y :: Z :: HNil, R, In0, Out0]
     ): Aux[(V, W, X, Y, Z) => R, Rule[In0, Out0]] = `n/a`
   }
 

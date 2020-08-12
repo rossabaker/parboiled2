@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import utest._
 object RunningSpec extends TestSuite {
 
   class TestParser(val input: ParserInput) extends Parser {
-    def A               = rule { 'a' ~ B ~ EOI }
-    def B               = rule { oneOrMore('b') }
-    def C(n: Int)       = rule { n.times('c') }
+    def A               = rule('a' ~ B ~ EOI)
+    def B               = rule(oneOrMore('b'))
+    def C(n: Int)       = rule(n.times('c'))
     def go(): Try[Unit] = null
   }
 

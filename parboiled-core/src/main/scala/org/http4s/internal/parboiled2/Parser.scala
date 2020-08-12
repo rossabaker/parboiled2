@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import scala.util.{Failure, Success, Try}
 import scala.util.control.{NoStackTrace, NonFatal}
 import org.http4s.internal.parboiled2.support._
 
-private[http4s] abstract class Parser(initialValueStackSize: Int = 16, maxValueStackSize: Int = 1024) extends RuleDSL {
+abstract private[http4s] class Parser(initialValueStackSize: Int = 16, maxValueStackSize: Int = 1024) extends RuleDSL {
   import Parser._
 
   require(maxValueStackSize <= 65536, "`maxValueStackSize` > 2^16 is not supported") // due to current snapshot design
@@ -220,9 +220,7 @@ private[http4s] abstract class Parser(initialValueStackSize: Int = 16, maxValueS
         scheme.parseError(ParseError(pos, pos, RuleTrace(Nil, RuleTrace.Fail(e.expected)) :: Nil))
       case NonFatal(e) =>
         scheme.failure(e)
-    } finally {
-      phase = null
-    }
+    } finally phase = null
   }
 
   /**
@@ -260,8 +258,8 @@ private[http4s] abstract class Parser(initialValueStackSize: Int = 16, maxValueS
     */
   def __restoreState(mark: Mark): Unit = {
     _cursor = (mark.value >>> 32).toInt
-    _cursorChar = ((mark.value >>> 16) & 0x000000000000FFFF).toChar
-    valueStack.size = (mark.value & 0x000000000000FFFF).toInt
+    _cursorChar = ((mark.value >>> 16) & 0x000000000000ffff).toChar
+    valueStack.size = (mark.value & 0x000000000000ffff).toInt
   }
 
   /**
@@ -294,12 +292,11 @@ private[http4s] abstract class Parser(initialValueStackSize: Int = 16, maxValueS
     * THIS IS NOT PUBLIC API and might become hidden in future. Use only if you know what you are doing!
     */
   def __exitAtomic(saved: Boolean): Unit =
-    if (saved) {
+    if (saved)
       phase match {
         case x: EstablishingReportedErrorIndex => x.currentAtomicStart = Int.MinValue
         case _                                 => throw new IllegalStateException
       }
-    }
 
   /**
     * THIS IS NOT PUBLIC API and might become hidden in future. Use only if you know what you are doing!
@@ -323,13 +320,12 @@ private[http4s] abstract class Parser(initialValueStackSize: Int = 16, maxValueS
     * THIS IS NOT PUBLIC API and might become hidden in future. Use only if you know what you are doing!
     */
   def __exitQuiet(saved: Int): Unit =
-    if (saved >= 0) {
+    if (saved >= 0)
       phase match {
         case x: DetermineReportQuiet => x.inQuiet = false
         case x: CollectingRuleTraces => x.minErrorIndex = saved
         case _                       => throw new IllegalStateException
       }
-    }
 
   /**
     * THIS IS NOT PUBLIC API and might become hidden in future. Use only if you know what you are doing!
@@ -338,9 +334,8 @@ private[http4s] abstract class Parser(initialValueStackSize: Int = 16, maxValueS
     phase match {
       case null | _: EstablishingPrincipalErrorIndex => // nothing to do
       case x: CollectingRuleTraces =>
-        if (_cursor >= x.minErrorIndex) {
+        if (_cursor >= x.minErrorIndex)
           if (x.errorMismatches == x.traceNr) throw Parser.StartTracingException else x.errorMismatches += 1
-        }
       case x: EstablishingReportedErrorIndex =>
         if (x.currentAtomicStart > x.maxAtomicErrorStart) x.maxAtomicErrorStart = x.currentAtomicStart
       case x: DetermineReportQuiet =>
@@ -393,14 +388,14 @@ private[http4s] abstract class Parser(initialValueStackSize: Int = 16, maxValueS
         __advance()
         __updateMaxCursor()
         __matchStringWrapped(string, ix + 1)
-      } else {
+      } else
         try __registerMismatch()
         catch {
           case Parser.StartTracingException =>
             import RuleTrace._
             __bubbleUp(NonTerminal(StringMatch(string), -ix) :: Nil, CharMatch(string charAt ix))
         }
-      } else true
+    else true
 
   /**
     * THIS IS NOT PUBLIC API and might become hidden in future. Use only if you know what you are doing!
@@ -422,14 +417,14 @@ private[http4s] abstract class Parser(initialValueStackSize: Int = 16, maxValueS
         __advance()
         __updateMaxCursor()
         __matchIgnoreCaseStringWrapped(string, ix + 1)
-      } else {
+      } else
         try __registerMismatch()
         catch {
           case Parser.StartTracingException =>
             import RuleTrace._
             __bubbleUp(NonTerminal(IgnoreCaseString(string), -ix) :: Nil, IgnoreCaseChar(string charAt ix))
         }
-      } else true
+    else true
 
   /**
     * THIS IS NOT PUBLIC API and might become hidden in future. Use only if you know what you are doing!
@@ -517,7 +512,7 @@ private[http4s] abstract class Parser(initialValueStackSize: Int = 16, maxValueS
 
   protected class __SubParserInput extends ParserInput {
     val offset                                            = _cursor // the number of chars the input the sub-parser sees is offset from the outer input start
-    def getLine(line: Int): String                        = ??? // TODO
+    def getLine(line: Int): String                        = ???     // TODO
     def sliceCharArray(start: Int, end: Int): Array[Char] = input.sliceCharArray(start + offset, end + offset)
     def sliceString(start: Int, end: Int): String         = input.sliceString(start + offset, end + offset)
     def length: Int                                       = input.length - offset
@@ -535,6 +530,7 @@ private[http4s] object Parser {
   }
 
   object DeliveryScheme extends AlternativeDeliverySchemes {
+
     implicit def Try[L <: HList, Out](implicit unpack: Unpack.Aux[L, Out]) =
       new DeliveryScheme[L] {
         type Result = Try[Out]
@@ -543,7 +539,9 @@ private[http4s] object Parser {
         def failure(error: Throwable)     = Failure(error)
       }
   }
+
   sealed abstract class AlternativeDeliverySchemes {
+
     implicit def Either[L <: HList, Out](implicit unpack: Unpack.Aux[L, Out]) =
       new DeliveryScheme[L] {
         type Result = Either[ParseError, Out]
@@ -551,6 +549,7 @@ private[http4s] object Parser {
         def parseError(error: ParseError) = Left(error)
         def failure(error: Throwable)     = throw error
       }
+
     implicit def Throw[L <: HList, Out](implicit unpack: Unpack.Aux[L, Out]) =
       new DeliveryScheme[L] {
         type Result = Out
@@ -689,6 +688,6 @@ private[http4s] object ParserMacros {
         else ${opTree.render(wrapped = false)}
       if (matched) org.http4s.internal.parboiled2.Rule else null""" // we encode the "matched" boolean as 'ruleResult ne null'
 
-    reify { ctx.Expr[RuleX](ruleTree).splice.asInstanceOf[Rule[I, O]] }
+    reify(ctx.Expr[RuleX](ruleTree).splice.asInstanceOf[Rule[I, O]])
   }
 }

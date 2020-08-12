@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 org.http4s
+ * Copyright 2009-2019 Mathias Doenitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.http4s.internal.parboiled2.support.HList.Prepend
 // we want to support the "short case class notation" `... ~> Foo`
 // unfortunately the Tree for the function argument to the `apply` overloads above does *not* allow us to inspect the
 // function type which is why we capture it separately with this helper type
-private[http4s] sealed trait FCapture[T]
+sealed private[http4s] trait FCapture[T]
 
 private[http4s] object FCapture {
   implicit def apply[T]: FCapture[T] = `n/a`
@@ -42,7 +42,7 @@ private[http4s] object FCapture {
 //    In = TailSwitch[I2, L, I], Out = TailSwitch[L, I2, O2]
 //  else
 //    In = I, Out = L ::: R :: HNil
-private[http4s] sealed trait Join[I <: HList, L <: HList, R] {
+sealed private[http4s] trait Join[I <: HList, L <: HList, R] {
   type In <: HList
   type Out <: HList
 }
@@ -51,22 +51,22 @@ private[http4s] object Join extends LowPrioJoin {
 
   implicit def forUnit[I <: HList, L <: HList]: Aux[I, L, Unit, I, L] = `n/a`
 
-  implicit def forHList[I <: HList, L <: HList, R <: HList, O <: HList](
-      implicit x: Prepend.Aux[L, R, O]
+  implicit def forHList[I <: HList, L <: HList, R <: HList, O <: HList](implicit
+      x: Prepend.Aux[L, R, O]
   ): Aux[I, L, R, I, O] = `n/a`
 
-  implicit def forRule[I <: HList, O <: HList, I2 <: HList, O2 <: HList, In <: HList, Out <: HList](
-      implicit i: TailSwitch.Aux[I2, I2, O, O, I, HNil, In],
+  implicit def forRule[I <: HList, O <: HList, I2 <: HList, O2 <: HList, In <: HList, Out <: HList](implicit
+      i: TailSwitch.Aux[I2, I2, O, O, I, HNil, In],
       o: TailSwitch.Aux[O, O, I2, I2, O2, HNil, Out]
   ): Aux[I, O, Rule[I2, O2], In, Out] = `n/a`
 }
 
-private[http4s] sealed abstract class LowPrioJoin {
+sealed abstract private[http4s] class LowPrioJoin {
 
   type Aux[I <: HList, L <: HList, R, In0 <: HList, Out0 <: HList] =
     Join[I, L, R] { type In = In0; type Out = Out0 }
 
-  implicit def forAny[I <: HList, L <: HList, R, In <: HList, Out <: HList](
-      implicit x: Aux[I, L, R :: HNil, In, Out]
+  implicit def forAny[I <: HList, L <: HList, R, In <: HList, Out <: HList](implicit
+      x: Aux[I, L, R :: HNil, In, Out]
   ): Aux[I, L, R, In, Out] = `n/a`
 }
