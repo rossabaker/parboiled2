@@ -3,13 +3,13 @@ import sbtcrossproject.CrossPlugin.autoImport._
 
 val commonSettings = Seq(
   organization := "org.http4s",
-  homepage := Some(new URL("http://parboiled.org")),
+  homepage := Some(new URL("http://github.com/http4s/parboiled2")),
   description := "Fork of parboiled2 for http4s, sans shapeless dependency",
   startYear := Some(2009),
   licenses := Seq("Apache-2.0" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt")),
   unmanagedResources in Compile += baseDirectory.value.getParentFile.getParentFile / "LICENSE",
   scmInfo := Some(
-    ScmInfo(url("https://github.com/sirthias/parboiled2"), "scm:git:git@github.com:sirthias/parboiled2.git")
+    ScmInfo(url("https://github.com/http4s/parboiled2"), "scm:git:git@github.com:http4s/parboiled2.git")
   ),
 
   scalaVersion := "2.12.11",

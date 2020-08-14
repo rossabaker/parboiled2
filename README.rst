@@ -5,6 +5,19 @@
 
 .. contents:: Contents of this Document
 
+Fork
+====
+
+This is a fork of the `original parboiled2`_ to keep http4s-core decoupled from
+the shapeless version. There is no public API here. We periodically synchronize
+upstream, and strongly encourage all improvements to be submitted upstream so
+the entire parboiled2 community may benefit.
+
+If you are not hacking on http4s, you want to be on upstream.  This doc is not
+otherwise maintained for the fork, and all documentation below refers to the
+original.
+
+.. _original parboiled2: https://github.com/sirthias/parboiled2
 
 Introduction
 ============
@@ -1370,6 +1383,10 @@ TODO
 
 Credits
 =======
+
+This work is a subtle fork of `Mathias Doenitz' parboiled2`__, and most credit belongs to that project.
+
+__ https://github.com/sirthias/parboiled2
 
 Much of *parboiled2* was developed by `Alexander Myltsev`__ during `GSoc 2013`__, a big thank you for his great work!
 
