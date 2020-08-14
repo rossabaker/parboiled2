@@ -1,0 +1,9 @@
+http4s-parboiled2
+Copyright 2009-2020 http4s.org
+Licensed under Apache License 2.0 (see LICENSE)
+
+This software is a fork of Mathias Doenitz' original parboiled2
+https://github.com/sirthias/parboiled2
+Copyright 2009-2013 Mathias Doenitz <http://parboiled2.org>
+Copyright 2013 Alexander Myltsev
+Licensed under Apache License 2.0 (see LICENSE)

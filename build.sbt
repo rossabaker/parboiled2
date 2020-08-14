@@ -57,7 +57,7 @@ val commonSettings = Seq(
   scalacOptions in (Compile, doc) += "-no-link-warnings",
   sourcesInBase := false,
   // file headers
-  headerLicense := Some(HeaderLicense.ALv2("2009-2019", "Mathias Doenitz")),
+  headerLicense := Some(HeaderLicense.ALv2("2009-2020", "org.http4s")),
   // reformat main and test sources on compile
   scalafmtOnCompile := true
 )
