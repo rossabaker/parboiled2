@@ -2,8 +2,6 @@ import ReleaseTransformations._
 import sbtcrossproject.CrossPlugin.autoImport._
 
 val commonSettings = Seq(
-  scalaVersion := "2.12.8",
-  crossScalaVersions := Seq("2.11.12", "2.12.8", "2.13.0-RC1"),
   organization := "org.http4s",
   homepage := Some(new URL("http://parboiled.org")),
   description := "Fork of parboiled2 for http4s, sans shapeless dependency",
