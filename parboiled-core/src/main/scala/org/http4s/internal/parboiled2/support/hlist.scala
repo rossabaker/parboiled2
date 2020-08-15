@@ -38,7 +38,7 @@ final private[http4s] case class ::[+H, +T <: HList](head: H, tail: T) extends H
   override def toString =
     head match {
       case _: ::[_, _] => "(" + head + ") :: " + tail.toString
-      case _           => head + " :: " + tail.toString
+      case _           => head.toString + " :: " + tail.toString
     }
 }
 

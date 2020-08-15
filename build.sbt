@@ -12,8 +12,8 @@ val commonSettings = Seq(
     ScmInfo(url("https://github.com/http4s/parboiled2"), "scm:git:git@github.com:http4s/parboiled2.git")
   ),
 
-  scalaVersion := "2.12.11",
-  crossScalaVersions := Seq("2.12.11", "2.13.3"),
+  scalaVersion := "0.26.0-RC1",
+  crossScalaVersions := Seq("2.12.11", "2.13.3", scalaVersion.value),
   scalacOptions ++= Seq(
     "-deprecation",
     "-encoding",
@@ -49,9 +49,15 @@ val commonSettings = Seq(
           "-Ybackend-parallelism",
           "8"
         )
-      case x => sys.error(s"unsupported scala version: $x")
+      case Some((0, _)) =>
+        Seq(
+          "-language:implicitConversions"
+        )
+      case _ =>
+        sys.error(s"unsupported scala version: ${scalaVersion.value}")
     }
   },
+  scalacOptions ++= { if (isDotty.value) Seq("-source:3.0-migration") else Nil },
   scalacOptions in (Compile, console) ~= (_ filterNot (o ⇒ o == "-Ywarn-unused-import" || o == "-Xfatal-warnings")),
   scalacOptions in (Test, console) ~= (_ filterNot (o ⇒ o == "-Ywarn-unused-import" || o == "-Xfatal-warnings")),
   scalacOptions in (Compile, doc) += "-no-link-warnings",
@@ -59,7 +65,7 @@ val commonSettings = Seq(
   // file headers
   headerLicense := Some(HeaderLicense.ALv2("2009-2020", "org.http4s")),
   // reformat main and test sources on compile
-  scalafmtOnCompile := true
+  scalafmtOnCompile := false
 )
 
 lazy val crossSettings = Seq(
@@ -117,23 +123,22 @@ val utestSettings = Seq(testFrameworks := Seq(new TestFramework("utest.runner.Fr
 
 /////////////////////// DEPENDENCIES /////////////////////////
 
-val utest           = Def.setting("com.lihaoyi" %%% "utest" % "0.7.4" % Test)
-val scalaCheck      = Def.setting("org.scalacheck" %%% "scalacheck" % "1.14.3" % Test)
-val `scala-reflect` = Def.setting("org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided)
-val `specs2-common` = Def.setting("org.specs2" %%% "specs2-common" % "4.10.2" % Test)
+val utest           = Def.setting("com.lihaoyi" %%% "utest" % "0.7.4" % Test withDottyCompat(scalaVersion.value))
+val scalaCheck      = Def.setting("org.scalacheck" %%% "scalacheck" % "1.14.3" % Test withDottyCompat(scalaVersion.value))
+val `specs2-common` = Def.setting("org.specs2" %%% "specs2-common" % "4.10.2" % Test withDottyCompat(scalaVersion.value))
 
 // benchmarks and examples only
-val `json4s-native`  = "org.json4s" %% "json4s-native"  % "3.6.9"
-val `json4s-jackson` = "org.json4s" %% "json4s-jackson" % "3.6.9"
-val `spray-json`     = "io.spray"   %% "spray-json"     % "1.3.5"
+val `json4s-native`  = Def.setting("org.json4s" %% "json4s-native"  % "3.6.9" withDottyCompat(scalaVersion.value))
+val `json4s-jackson` = Def.setting("org.json4s" %% "json4s-jackson" % "3.6.9" withDottyCompat(scalaVersion.value))
+val `spray-json`     = Def.setting("io.spray"   %% "spray-json"     % "1.3.5" withDottyCompat(scalaVersion.value))
 
 /////////////////////// PROJECTS /////////////////////////
 
 lazy val root = project
   .in(file("."))
   .aggregate(examples, jsonBenchmark)
-  .aggregate(parboiledJVM, parboiledJS)
-  .aggregate(parboiledCoreJVM, parboiledCoreJS)
+  .aggregate(parboiledJVM) // , parboiledJS
+  .aggregate(parboiledCoreJVM) // , parboiledCoreJS
   .settings(commonSettings)
   .settings(releaseSettings)
   .settings(publish / skip := true)
@@ -145,7 +150,7 @@ lazy val examples = project
   .settings(utestSettings)
   .settings(
     publish / skip := true,
-    libraryDependencies ++= Seq(utest.value, `spray-json`)
+    libraryDependencies ++= Seq(utest.value, `spray-json`.value)
   )
 
 lazy val bench = inputKey[Unit]("Runs the JSON parser benchmark with a simple standard config")
@@ -157,7 +162,7 @@ lazy val jsonBenchmark = project
   .settings(commonSettings)
   .settings(
     publish / skip := true,
-    libraryDependencies ++= Seq(`json4s-native`, `json4s-jackson`),
+    libraryDependencies ++= Seq(`json4s-native`.value, `json4s-jackson`.value),
     bench := (run in Compile).partialInput(" -i 10 -wi 10 -f1 -t1").evaluated
   )
 
@@ -192,7 +197,7 @@ lazy val parboiled = crossProject(JSPlatform, JVMPlatform)
     mappings in (Compile, packageDoc) ++= (mappings in (parboiledCoreJS.project, Compile, packageDoc)).value
   )
   .settings(
-    libraryDependencies ++= Seq(`scala-reflect`.value, utest.value),
+    libraryDependencies ++= Seq(utest.value),
     mappings in (Compile, packageBin) ~= (_.groupBy(_._2).toSeq.map(_._2.head)), // filter duplicate outputs
     mappings in (Compile, packageDoc) ~= (_.groupBy(_._2).toSeq.map(_._2.head)), // filter duplicate outputs
     pomPostProcess := {                                                          // we need to remove the dependency onto the parboiledCore module from the POM
@@ -222,7 +227,7 @@ lazy val parboiledCore = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(libraryDependencies += scalaCheck.value)
   .settings(
     publish / skip := true,
-    libraryDependencies ++= Seq(`scala-reflect`.value, utest.value, `specs2-common`.value),
+    libraryDependencies ++= Seq(utest.value, `specs2-common`.value),
     generateActionOps := ActionOpsBoilerplate((sourceManaged in Compile).value, streams.value),
     (sourceGenerators in Compile) += generateActionOps.taskValue
   )

@@ -32,7 +32,7 @@ sealed private[http4s] trait Unpack[L <: HList] {
 
 private[http4s] object Unpack extends AlternativeUnpacks {
 
-  implicit def fromAux[L <: HList, Out0](implicit aux: Aux[L, Out0]) =
+  implicit def fromAux[L <: HList, Out0](implicit aux: Aux[L, Out0]): Unpack[L] =
     new Unpack[L] {
       type Out = Out0
       def apply(hlist: L) = aux(hlist)

@@ -19,9 +19,8 @@ package org.http4s.internal.parboiled2.support
 import scala.annotation.tailrec
 import org.http4s.internal.parboiled2._
 
-private[http4s] trait OpTreeContext[OpTreeCtx <: ParserMacros.ParserContext] {
-  val c: OpTreeCtx
-  import c.universe._
+private[http4s] trait OpTreeContext {
+  val parser: Parser
 
   sealed trait OpTree {
     // renders a Boolean Tree
